@@ -1,23 +1,22 @@
 from multiprocessing.connection import Client, wait
 import sys
+import communication_multiprocessing as c
+import select
 
-def listen(c,p):
+def listen(conn,player):
     try:
-        msg = c.recv()
+        msg = conn.recv()
         print(msg)
-
-        # sends response if requested from server
-        if '['+p.name+']' in msg and "Input" in msg:
+        # responds if the server requests the player
+        if '['+player.name+']' in msg and "Input" in msg:
             response = input().strip()
-            c.send(response)
-
-    # closes the client process if the connection is closed
+            conn.send(response)
     except EOFError: 
-        print("Server closed the connection\nClosing the Client....")
-        sys.exit(0)
+            print("Server closed the connection\nClosing the Client....")
+            sys.exit(0)# closes the client process if the connection is closed
     except:
         pass
-
+        
 def connect():
     # Establishing connection with server
     conn = Client(("127.0.0.1",6000))
@@ -40,3 +39,7 @@ if __name__ == "__main__":
     # listens the connection for messages
     while True:
         listen(conn, player)
+        
+        
+    
+

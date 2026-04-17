@@ -12,7 +12,7 @@ class Player:
     def show_hands(self):
         print(self.hand)
         
-def handling_connections(addr, min_conn=1, timeout=0): 
+def handling_connections(addr, min_conn=1, max_conn=4, timeout=0): 
     time_taken =0
     conns = {}
     Server = Listener(addr)
@@ -20,6 +20,11 @@ def handling_connections(addr, min_conn=1, timeout=0):
     start_time=0
     print("Accepting Connections")
     while(time_taken < timeout):
+        # escape with maximum connections reached
+        if(len(conns) == max_conn):
+            print("maximum clients joined")
+            broadcast(conns.values(), "Maximum players joined")
+            break
         # managing timer if minimum clients have joined
         if(len(conns) >= min_conn):
             if(not start_time):
@@ -52,4 +57,5 @@ def recv_from(conn):
 
 def broadcast(conns, msg):
     for conn in conns:
-        send_to(conn, msg)
+        send_to(conn, "[BROADCAST] "+msg)
+
