@@ -2,6 +2,16 @@ from multiprocessing.connection import Listener, Client, wait
 import time
 import select
 
+class Player:
+    def __init__(self,name) -> None:
+        self.name = name
+        self.bullets = 1
+        self.hand = []
+        self.alive = True
+
+    def show_hands(self):
+        print(self.hand)
+        
 def handling_connections(addr, min_conn=1, timeout=0): 
     time_taken =0
     conns = {}
@@ -26,11 +36,12 @@ def handling_connections(addr, min_conn=1, timeout=0):
             while(p_name in conns.keys()):
                 conn.send("Give a different name, already in use:")
                 p_name = conn.recv()
-            conns[p_name] = conn
             conn.send("Connected")
-            print(f"Connection Successful for player [{p_name}]")
+            player = Player(p_name)
+            conn.send(player)
+            conns[player] = conn
+            print(f"Connection Successful for player [{player.name}]")
     
-    print(conns.keys())
     return conns
 
 def send_to(conn, msg):
