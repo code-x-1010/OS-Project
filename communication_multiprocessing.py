@@ -8,9 +8,8 @@ def handling_connections(addr, min_conn=1, timeout=0):
     Server = Listener(addr)
     sock = Server._listener._socket
     start_time=0
-    #print(0)
+    print("Accepting Connections")
     while(time_taken < timeout):
-        #print(1)
         # managing timer if minimum clients have joined
         if(len(conns) >= min_conn):
             if(not start_time):
@@ -25,11 +24,11 @@ def handling_connections(addr, min_conn=1, timeout=0):
             conn = Server.accept()
             p_name = conn.recv()
             while(p_name in conns.keys()):
-                conn.send("Give a different name, already in:")
+                conn.send("Give a different name, already in use:")
                 p_name = conn.recv()
             conns[p_name] = conn
             conn.send("Connected")
-            print("Connection Successful")
+            print(f"Connection Successful for player [{p_name}]")
     
     print(conns.keys())
     return conns
