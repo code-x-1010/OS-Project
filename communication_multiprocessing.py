@@ -33,3 +33,12 @@ def handling_connections(addr, min_conn=1, timeout=0):
     print(conns.keys())
     return conns
 
+def send_to(conn, msg):
+    conn.send(msg)
+
+def recv_from(conn):
+    return conn.recv()
+
+def broadcast(conns, msg):
+    for conn in conns:
+        send_to(conn, msg)
