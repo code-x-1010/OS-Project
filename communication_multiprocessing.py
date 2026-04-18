@@ -41,7 +41,7 @@ def handling_connections(addr, min_conn=1, max_conn=4, timeout=0):
         # escape with maximum connections reached
         if(len(conns_dict) == max_conn):
             print("maximum clients joined")
-            broadcast(conns_dict.values(), "Maximum players joined")
+            broadcast(conns_dict, conns_dict, "Maximum players joined")
             break
         # managing timer if minimum clients have joined
         if(len(conns_dict) >= min_conn):
@@ -70,24 +70,24 @@ def handling_connections(addr, min_conn=1, max_conn=4, timeout=0):
 def send_to(conn, conn_dict, msg):
     try:
         conn.send(msg)
-    except EOFError:
-        broadcast(conn_dict, f"Player [{conn_dict[conn]}] has disconnected")
-        del conn_dict[conn]
-    finally:
-        return conn_dict
+    except (EOFError, BrokenPipeError, OSError):
+        if conn in conn_dict:
+            name = conn_dict.pop(conn)
+            broadcast(conn_dict, conn_dict, f"Player [{name}] has disconnected")
+    return conn_dict
 
 def recv_from(conn, conn_dict):
+    msg = None
     try:
         msg = conn.recv()
-    except EOFError:
-        broadcast(conn_dict, f"Player [{conn_dict[conn]}] has disconnected")
-        del conn_dict[conn]
-        msg = None
-    finally:
-        return conn_dict, msg
+    except (EOFError, BrokenPipeError, OSError):
+        if conn in conn_dict:
+            name = conn_dict.pop(conn)
+            broadcast(conn_dict, conn_dict, f"Player [{name}] has disconnected")
+    return conn_dict, msg
 
 def broadcast(conns, conn_dict, msg):
-    for conn in conns.keys():
+    for conn in list(conns.keys()):
         conn_dict = send_to(conn, conn_dict, "[BROADCAST] "+msg)
     return conn_dict
 
