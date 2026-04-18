@@ -154,6 +154,11 @@ while not game_over:
                         turn_over = True
                         round_over = True
                         players_dict = c.broadcast(alive_players, players_dict, f"{players_dict[curr_conn]} chose to call LIAR !!!!")
+                        # replace the joker card with the round symbol
+                        for i, val in previous_hand:
+                            if val == "Joker":
+                                previous_hand[i] = round_symbol
+
                         prev_conn = list(alive_players.keys())[(current_player_index - 1) % len(alive_players)]
                         if previous_hand.count(round_symbol) != len(previous_hand):
                             players_dict = c.broadcast(alive_players, players_dict, f"{players_dict[prev_conn]} is a LIAR !!!!")
