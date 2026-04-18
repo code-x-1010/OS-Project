@@ -32,19 +32,19 @@ class Player:
         
 def handling_connections(addr, min_conn=1, max_conn=4, timeout=0): 
     time_taken =0
-    conns = {}
+    conns_dict = {}
     Server = Listener(addr)
     sock = Server._listener._socket
     start_time=0
     print("Accepting Connections")
     while(time_taken < timeout):
         # escape with maximum connections reached
-        if(len(conns) == max_conn):
+        if(len(conns_dict) == max_conn):
             print("maximum clients joined")
-            broadcast(conns.values(), "Maximum players joined")
+            broadcast(conns_dict.values(), "Maximum players joined")
             break
         # managing timer if minimum clients have joined
-        if(len(conns) >= min_conn):
+        if(len(conns_dict) >= min_conn):
             if(not start_time):
                 print(f"The connecting phase will end in {timeout} seconds")
                 start_time = time.time()
@@ -56,24 +56,37 @@ def handling_connections(addr, min_conn=1, max_conn=4, timeout=0):
         if sock in readable: 
             conn = Server.accept()
             p_name = conn.recv()
-            while(p_name in conns.keys()):
+            while(p_name in conns_dict.keys()):
                 conn.send("Give a different name, already in use:")
                 p_name = conn.recv()
             conn.send("Connected")
             player = Player(p_name)
             conn.send(player)
-            conns[player] = conn
+            conns_dict[conn] = player
             print(f"Connection Successful for player [{player.name}]")
     
-    return conns
+    return conns_dict
 
-def send_to(conn, msg):
-    conn.send(msg)
+def send_to(conn, conn_dict, msg):
+    try:
+        conn.send(msg)
+    except EOFError:
+        broadcast(conn_dict, f"Player [{conn_dict[conn].name}] has disconnected")
+        del conn_dict[conn]
+    finally:
+        return conn_dict
 
-def recv_from(conn):
-    return conn.recv()
+def recv_from(conn, conn_dict):
+    try:
+        msg = conn.recv()
+    except EOFError:
+        broadcast(conn_dict, f"Player [{conn_dict[conn].name}] has disconnected")
+        del conn_dict[conn]
+        msg = None
+    finally:
+        return conn_dict, msg
 
-def broadcast(conns, msg):
-    for conn in conns:
-        send_to(conn, "[BROADCAST] "+msg)
+def broadcast(conn_dict, msg):
+    for conn in conn_dict.keys():
+        send_to(conn, conn_dict, "[BROADCAST] "+msg)
 
