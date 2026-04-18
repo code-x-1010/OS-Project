@@ -3,17 +3,35 @@ import sys
 import communication_multiprocessing as c
 import select
 
-def listen(conn,player):
+def listen(conn):
+    global player
     try:
         msg = conn.recv()
         print(msg)
         # responds if the server requests the player
-        if '['+player.name+']' in msg and "Input" in msg:
-            response = input().strip()
-            conn.send(response)
+        if '['+player.name+']' in msg: 
+            if "Input" in msg:
+                response = input().strip()
+                conn.send(response)
+            if "[SEND INFO]" in msg:
+                conn.send(player)
+                player = conn.recv()
+            if "[LOST]" in msg:
+                player.roullette()
+                conn.send(player.alive)
+            if "[PLAY]" in msg:
+                while True:
+                    response = input().strip().split(",")
+                    if len(response)>0 and len(response)<4:
+                        break
+                    else:
+                        print("Wrong format")
+                        print(msg)
+                conn.send(response)
     except EOFError: 
             print("Server closed the connection\nClosing the Client....")
             sys.exit(0)# closes the client process if the connection is closed
+    except KeyboardInterrupt: sys.exit(0) # close the process due to keyboard interupt
     except:
         pass
         
@@ -35,14 +53,11 @@ def connect():
     return conn, p
 
 if __name__ == "__main__":
+    global player
     conn, player = connect()
-    deck = ["A"]*6+["K"]*6+["Q"]*6+["Joker"]*2
-    deck = player.deal_cards(deck)
-    print(deck)
-    player.roullette()
     # listens the connection for messages
     while True:
-        listen(conn, player)
+        listen(conn)
         
         
     

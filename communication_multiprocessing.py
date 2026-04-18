@@ -62,7 +62,7 @@ def handling_connections(addr, min_conn=1, max_conn=4, timeout=0):
             conn.send("Connected")
             player = Player(p_name)
             conn.send(player)
-            conns_dict[conn] = player
+            conns_dict[conn] = p_name
             print(f"Connection Successful for player [{player.name}]")
     
     return conns_dict
@@ -71,7 +71,7 @@ def send_to(conn, conn_dict, msg):
     try:
         conn.send(msg)
     except EOFError:
-        broadcast(conn_dict, f"Player [{conn_dict[conn].name}] has disconnected")
+        broadcast(conn_dict, f"Player [{conn_dict[conn]}] has disconnected")
         del conn_dict[conn]
     finally:
         return conn_dict
@@ -80,13 +80,14 @@ def recv_from(conn, conn_dict):
     try:
         msg = conn.recv()
     except EOFError:
-        broadcast(conn_dict, f"Player [{conn_dict[conn].name}] has disconnected")
+        broadcast(conn_dict, f"Player [{conn_dict[conn]}] has disconnected")
         del conn_dict[conn]
         msg = None
     finally:
         return conn_dict, msg
 
-def broadcast(conn_dict, msg):
-    for conn in conn_dict.keys():
-        send_to(conn, conn_dict, "[BROADCAST] "+msg)
+def broadcast(conns, conn_dict, msg):
+    for conn in conns.keys():
+        conn_dict = send_to(conn, conn_dict, "[BROADCAST] "+msg)
+    return conn_dict
 
