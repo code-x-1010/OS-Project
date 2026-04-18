@@ -106,9 +106,7 @@ def broadcast(conns, msg):
 
 
 def await_delivery(conns, timeout=5.0):
-    """Block until every connected client has fetched all pending outbound messages.
-    XML-RPC is pull-based, so without this the server may exit before clients
-    fetch their last message, and they will see a dropped connection instead."""
+    """Block until every connected client has fetched all pending outbound messages."""
     deadline = time.time() + timeout
     for conn in conns:
         q = conn._hub.to_client[conn.name]
