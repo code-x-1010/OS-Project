@@ -90,6 +90,7 @@ while not game_over:
     first_turn = True
     round_symbol = random.choice(["A","K","Q"])
     round_over = False
+    players_dict = c.broadcast(alive_players, players_dict,f"This round card is ({round_symbol})")
     while not round_over:
         # drop disconnected players from this round's view
         for conn in list(alive_players.keys()):
@@ -155,8 +156,8 @@ while not game_over:
                         round_over = True
                         players_dict = c.broadcast(alive_players, players_dict, f"{players_dict[curr_conn]} chose to call LIAR !!!!")
                         # replace the joker card with the round symbol
-                        for i, val in previous_hand:
-                            if val == "Joker":
+                        for i in range(len(previous_hand)):
+                            if previous_hand[i] == "Joker":
                                 previous_hand[i] = round_symbol
 
                         prev_conn = list(alive_players.keys())[(current_player_index - 1) % len(alive_players)]
