@@ -1,6 +1,7 @@
 from multiprocessing.connection import Listener, Client, wait
 import time
 import select
+import random
 
 class Player:
     def __init__(self,name) -> None:
@@ -11,6 +12,23 @@ class Player:
 
     def show_hands(self):
         print(self.hand)
+    
+    def deal_cards(self, deck):
+        self.hand = random.sample(deck, k=5) # the 5 cards to deal
+        for card in self.hand:
+            deck.remove(card)
+        return deck # returns the deck with remaining cards
+    
+    def roullette(self):
+        n = random.randint(0,6)
+        if n <= self.bullets:
+            print("You are dead")
+            self.alive = False
+        else:
+            print("You have escaped..., but not for long")
+            self.bullets += 1
+            print(f"Now the chamber has {self.bullets} bullets")
+
         
 def handling_connections(addr, min_conn=1, max_conn=4, timeout=0): 
     time_taken =0

@@ -36,6 +36,10 @@ def connect():
 
 if __name__ == "__main__":
     conn, player = connect()
+    deck = ["A"]*6+["K"]*6+["Q"]*6+["Joker"]*2
+    deck = player.deal_cards(deck)
+    print(deck)
+    player.roullette()
     # listens the connection for messages
     while True:
         listen(conn, player)
